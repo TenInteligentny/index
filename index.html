@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+<head>
+   <title> Sm</title>
+  <style>
+    #canva{
+      background-color: gray;
+      width: 500px;
+      height: 500px;
+    }
+    
+    #wyburKoloru{
+      position: absolute;
+      top: 80px;
+      left: 8px;
+      width: 500px;
+      height: 500px;
+      background-color: brown;
+    }
+    
+    #pokarzKolor{
+      position: absolute;
+      top: 80px;
+      left: 508px;
+      width: 100px;
+      height: 100px;
+      background-color: green;
+    }
+    
+    #zK{
+      position: absolute;
+      top: 180px;
+      left: 508px;
+    }
+    
+    #zS{
+      position: absolute;
+      top: 200px;
+      left: 508px;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="tekst">Czas Start gdy zaczniesz</h1>
+  <canvas id="canva" onclick="morzeStart()" width="500px" height="500px"></canvas>
+  <div id="wyburKoloru"></div>
+  <div id="pokarzKolor"></div>
+  <input type="button" value="Zmień kolor" onclick="zmienKolor()" id="zK">
+  <input type="button" value="Zmień Styl" onclick="zmienStyl()" id="zS">
+  <input type="button" value="Koniec" onclick="koniec()" id="koniec">
+  <script>
+    let wyburKoloruPanel = document.getElementById("wyburKoloru");
+    wyburKoloruPanel.style.display = "none";
+    let czyStart = false;
+    let canva = document.getElementById("canva");
+    let ctx = canva.getContext("2d");
+    let czyStopRysowania = true;
+    let licznikKwadratow = 0;
+    let licznikCzasuSekundy = -1;
+    let czyDalejMierzycCzas = true;
+    let kolor = "green";
+    let licznikZmianKolorowP = 0;
+    let listaKolorow = ["red","blue","yellow","green"];
+    let licznikStopow = 0;
+    let licznikZmKo = 0;
+    let czyZmienialStyl = false;
+    let czyStylKwadratowy = true;
+    let kliknienicie = {
+      x1: null,
+      x2: null,
+      y1: null,
+      y2: null,
+    }
+    ctx.strokeStyle = "green";
+    ctx.lineWidth = 10;
+    ctx.fillStyle = "green";
+     let morzeStart = function(){
+       if(!czyStart){
+         czyStart = true;
+         canva.addEventListener("mousemove",narysujLinie);
+         canva.addEventListener("click",rL);
+         liczSek();
+       }
+     }
+     
+     let zmienStyl = function(){
+       czyZmienialStyl = true;
+       kliknienicie.x1 = null;
+       kliknienicie.y1 = null;
+       czyStopRysowania = true;
+       if(czyStylKwadratowy){
+         czyStylKwadratowy = false;
+       } else {
+         czyStylKwadratowy = true;
+       }
+     }
+     
+     let liczSek = function(){
+       if(!czyDalejMierzycCzas){
+         return;
+       }
+       licznikCzasuSekundy += 1;
+       setTimeout(liczSek,1000);
+     }
+     
+     let przerwa = function(){
+       if(czyStopRysowania){
+         czyStopRysowania = false;
+       } else {
+         czyStopRysowania = true;
+         licznikStopow += 1;
+       }
+     }
+     
+     let zmienKolor = function(){
+       kolor = listaKolorow[licznikZmianKolorowP];
+       licznikZmianKolorowP += 1;
+       ctx.fillStyle = kolor;
+       ctx.strokeStyle = kolor;
+       licznikZmKo += 1;
+       document.getElementById("pokarzKolor").style.backgroundColor = kolor;
+       if(licznikZmianKolorowP>listaKolorow.length){
+         licznikZmianKolorowP = 0;
+       }
+     }
+     
+     let narysujLinie = function(e){
+       if(!czyStylKwadratowy){
+         return;
+       }
+       if(czyStopRysowania){
+         return;
+       }
+       licznikKwadratow += 1;
+       console.log(e);
+       ctx.beginPath();
+       ctx.fillRect(e.offsetX,e.offsetY,10,10);
+       ctx.fill;
+     }
+     
+     let rL = function(e){
+       if(czyStylKwadratowy){
+         return;
+       }
+       if(kliknienicie.x1 === null || kliknienicie.y1 === null){
+         kliknienicie.x1 = e.offsetX;
+         kliknienicie.y1 = e.offsetY;
+         return;
+       }
+       ctx.beginPath();
+       ctx.moveTo(kliknienicie.x1,kliknienicie.y1);
+       ctx.lineTo(e.offsetX,e.offsetY);
+       ctx.stroke();
+       kliknienicie.x1 = null;
+       kliknienicie.y1 = null;
+     }
+     
+     let wyslijKomunikat = function(h){
+       alert(h);
+     }
+     
+     let schowaj = function(){
+       canva.style.display = "none";
+       document.getElementById("tekst").style.display = "none";
+       document.getElementById("koniec").style.display = "none";
+       document.getElementById("zK").style.display = "none";
+       document.getElementById("pokarzKolor").style.display = "none";
+     }
+     
+     let koniec = function(){
+       czyDalejMierzycCzas = false;
+       schowaj();
+       let x = 0;
+       x += licznikKwadratow/500;
+       x = Math.floor(x);
+       if(x>=3){
+         x = 3;
+       } else {
+         wyslijKomunikat("Za mało rysunku!");
+       }
+       
+       let y = licznikStopow/3;
+       y = Math.floor(y);
+       if(y>=2){
+         y = 2;
+       } else {
+         wyslijKomunikat("Za mało estetyki!");
+       }
+       
+       let z = licznikCzasuSekundy/10;
+       z = Math.floor(z);
+       if(z>=2){
+         z = 2;
+       } else {
+         wyslijKomunikat("Za mało się starasz!");
+       }
+       
+       let r = licznikZmKo/5;
+       r = Math.floor(r);
+       if(r>= 2){
+         r = 2;
+       } else {
+         wyslijKomunikat("Za mało kolorów");
+       }
+       
+       let f = 0;
+       if(czyZmienialStyl){
+         f = 1;
+       } else {
+         wyslijKomunikat("Pobaw się stylami!");
+       }
+       
+       
+       
+       wyslijKomunikat("Zdobyłeś " + (x+y+z+r+f) + " punktów na 10!");
+       if((x+y+z+r+1)===10){
+         wyslijKomunikat("Brawo kod to: 122");
+       } else {
+         wyslijKomunikat("Postaraj się bardziej aby uzyskać kod wybrańca!");
+       }
+     }
+         canva.addEventListener("click",przerwa);
+  </script>
+</body>
+</html>
